@@ -1,0 +1,34 @@
+--- a/Sources/rootshellVNC/API/VNCSession.swift (rootshell-vnc v0.1.8, ef4d0c4)
++++ b/Sources/rootshellVNC/API/VNCSession.swift (ScreenMate vendored)
+@@ -836,7 +836,8 @@
+     /// Server display rectangles, normalized into framebuffer coordinates and
+     /// ordered as announced by the server (primary first). Standard mode uses
+     /// these to present only the number of displays selected by the user.
+-    private(set) var remoteDisplayRegions: [CGRect] = []
++    // ScreenMate patch 1: public read access for client-side monitor selection.
++    public private(set) var remoteDisplayRegions: [CGRect] = []
+     @ObservationIgnored
+     private var remoteDisplayRegionByID: [UInt32: CGRect] = [:]
+     @ObservationIgnored
+@@ -944,6 +945,21 @@
+         secondaryVideoBandRenderer.presentPendingBandsIfAny()
+         if renderer != nil, trailingSnapshotTask == nil {
+             scheduleTrailingSnapshot(interval: 0)
++        }
++    }
++
++    // ScreenMate patch 2: user-initiated recovery refresh. Asks for one
++    // complete (non-incremental) framebuffer update, plus a keyframe on the
++    // High Performance media path. Normal operation never needs this.
++    public func requestFullRefresh() {
++        guard connectionState.isConnected,
++              let transport = transportSession else { return }
++        let highPerformance = isHighPerformanceMode
++        Task { [transport] in
++            if highPerformance {
++                await transport.requestVideoKeyframe()
++            }
++            try? await transport.requestFramebufferUpdate(incremental: false)
+         }
+     }
+ 

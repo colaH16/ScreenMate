@@ -1,0 +1,10 @@
+// Signing defaults for a fresh clone: no team and a placeholder bundle ID.
+// Put your own values in Config/Signing.local.xcconfig (git-ignored):
+//
+//   DEVELOPMENT_TEAM = ABCDE12345
+//   SCREENMATE_BUNDLE_PREFIX = com.yourname
+
+DEVELOPMENT_TEAM =
+SCREENMATE_BUNDLE_PREFIX = com.example
+
+#include? "Signing.local.xcconfig"

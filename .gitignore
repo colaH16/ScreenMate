@@ -1,0 +1,17 @@
+# Build output
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Live-probe screenshots of the Mac desktop: never commit
+ProbeResults/
+
+# macOS
+.DS_Store
+
+# Personal values kept out of the public repository
+CLAUDE_HANDOFF.md
+App/StarterProfiles.json
+Config/Signing.local.xcconfig

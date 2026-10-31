@@ -1,0 +1,4 @@
+[
+  { "name": "Mac mini (LAN)", "host": "192.0.2.10", "port": 5900, "username": "your-mac-user" },
+  { "name": "Mac mini (VPN)", "host": "mac-mini.example.net", "username": "your-mac-user" }
+]
