@@ -176,6 +176,14 @@ let phaseWatcher = Task { @MainActor in
 let connectStart = Date()
 await controller.connect(password: password)
 password = ""
+// connect() returns once the transport and sign-in are up; the engine then
+// finishes starting the remote session on its own.
+_ = await waitUntil(timeout: 15) {
+    switch controller.status {
+    case .connecting, .idle: false
+    default: true
+    }
+}
 phaseWatcher.cancel()
 
 switch controller.status {

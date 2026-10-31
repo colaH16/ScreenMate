@@ -66,6 +66,7 @@ public final class RemoteSessionController {
     @ObservationIgnored public private(set) var jumpGeneration = 0
 
     @ObservationIgnored private var password: String?
+    @ObservationIgnored private var connectionRecorded = false
     @ObservationIgnored private var buttonMask: UInt8 = 0
     @ObservationIgnored private var heldModifierKeysyms: [UInt32] = []
     @ObservationIgnored private var scrollAccumulator = ScrollAccumulator()
@@ -128,13 +129,16 @@ public final class RemoteSessionController {
 
     /// Sign in with the Mac account. The password is kept in memory only
     /// while this session is open, for manual retries.
+    ///
+    /// Returns once the transport and sign-in are up; the engine finishes
+    /// starting the remote session afterwards, so watch `status` for
+    /// `.connected`.
     public func connect(password: String) async {
         self.password = password
         failure = nil
+        connectionRecorded = false
         do {
             try await session.connect(credentials: SessionSetup.credentials(for: profile, password: password))
-            profile.lastConnectedAt = Date()
-            onProfileChange?(profile)
             syncLayout()
         } catch {
             failure = ConnectionFailure.classify(error)
@@ -170,6 +174,12 @@ public final class RemoteSessionController {
         guard layout != screen.layout else { return }
         screen.updateLayout(layout)
         jumpGeneration += 1
+        if !layout.isEmpty, !connectionRecorded, session.connectionState.isConnected {
+            // The session really came up: remember it for list ordering.
+            connectionRecorded = true
+            profile.lastConnectedAt = Date()
+            onProfileChange?(profile)
+        }
         publish()
         // Put the Mac's pointer where ours is drawn (first frame, reconnect,
         // or a display change that clamped the pointer).
